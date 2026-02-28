@@ -1,3 +1,4 @@
+print("[RoEditor_DEBUG] Reached ID: 34")
 local git = {}
 
 git._apiBase = "https://api.github.com/repos/"
@@ -5,10 +6,12 @@ git._rawBase = "https://raw.githubusercontent.com/"
 git.currentSha = nil
 
 function git.initCache(sha)
+    print("[RoEditor_DEBUG] Reached ID: 35")
 	git.currentSha = sha
 end
 
 local function ensureDir(path)
+    print("[RoEditor_DEBUG] Reached ID: 36")
 	if not makefolder or not isfolder then return end
 	local parts = string.split(path, "/")
 	local current = ""
@@ -20,6 +23,7 @@ local function ensureDir(path)
 end
 
 function git.fetch(repo, ref, filePath)
+    print("[RoEditor_DEBUG] Reached ID: 37")
 	local sha = git.currentSha
 	local cacheEnabled = (sha and isfile and readfile and writefile and makefolder and isfolder)
 	local cachePath = "roeditor/cache/" .. tostring(sha) .. "/" .. filePath
@@ -30,6 +34,7 @@ function git.fetch(repo, ref, filePath)
 
 	local rawUrl = git._rawBase .. repo .. "/" .. (sha or ref) .. "/" .. filePath
 	local ok, content = pcall(function() return game:HttpGet(rawUrl) end)
+     print("[RoEditor_DEBUG] Reached ID: 38")
 	
 	if not ok then return nil, content end
 
@@ -39,6 +44,7 @@ function git.fetch(repo, ref, filePath)
 
 	if cacheEnabled then
 		pcall(function()
+      print("[RoEditor_DEBUG] Reached ID: 39")
 			ensureDir(cachePath)
 			writefile(cachePath, content)
 		end)

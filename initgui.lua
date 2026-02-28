@@ -1,10 +1,13 @@
+print("[RoEditor_DEBUG] Reached ID: 30")
 return function(UI)
+    print("[RoEditor_DEBUG] Reached ID: 31")
 	local Players = game:GetService("Players")
 	local CoreGui = game:GetService("CoreGui")
 	local ui = {}
 
 	local highlightParent
 	pcall(function() highlightParent = CoreGui end)
+     print("[RoEditor_DEBUG] Reached ID: 32")
 	if not highlightParent then highlightParent = workspace.CurrentCamera end
 
 	ui.selectorHighlight = UI("Highlight", { FillColor = Color3.new(1, 0, 0), OutlineColor = Color3.new(1, 1, 1), FillTransparency = 0.5, OutlineTransparency = 0, Enabled = false, Parent = highlightParent })
@@ -37,6 +40,7 @@ return function(UI)
 		targetParent = gethui()
 	else
 		pcall(function() targetParent = CoreGui end)
+      print("[RoEditor_DEBUG] Reached ID: 33")
 		if not targetParent then targetParent = Players.LocalPlayer:WaitForChild("PlayerGui") end
 	end
 	ui.gui.Parent = targetParent

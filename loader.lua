@@ -1,3 +1,4 @@
+print("[RoEditor_DEBUG] Reached ID: 1")
 local HttpService = game:GetService("HttpService")
 
 local REPO = "BrokenByteOfCode/RoEditor"
@@ -5,6 +6,7 @@ local REF = "main"
 
 local sha = nil
 pcall(function()
+    print("[RoEditor_DEBUG] Reached ID: 2")
 	local url = "https://api.github.com/repos/" .. REPO .. "/commits/" .. REF
 	local res = game:HttpGet(url)
 	local data = HttpService:JSONDecode(res)
@@ -20,10 +22,12 @@ if cacheEnabled and isfile(gitPath) then
 else
 	local url = "https://raw.githubusercontent.com/" .. REPO .. "/" .. (sha or REF) .. "/modules/git.lua"
 	local ok, content = pcall(function() return game:HttpGet(url) end)
+     print("[RoEditor_DEBUG] Reached ID: 3")
 	if not ok then error("[loader] Critical: couldn't fetch git.lua") end
 	gitSrc = content
 	if cacheEnabled then
 		pcall(function()
+      print("[RoEditor_DEBUG] Reached ID: 4")
 			if not isfolder("roeditor") then makefolder("roeditor") end
 			if not isfolder("roeditor/cache") then makefolder("roeditor/cache") end
 			if not isfolder("roeditor/cache/" .. sha) then makefolder("roeditor/cache/" .. sha) end

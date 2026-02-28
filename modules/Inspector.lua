@@ -1,4 +1,6 @@
+print("[RoEditor_DEBUG] Reached ID: 59")
 return function(obj, ui, cleanInspector, inspectorConnections, props, audioModule, actionsModule, viewportModule, guiPreviewModule, scriptViewerModule, Players, RunService, modelExportApi)
+    print("[RoEditor_DEBUG] Reached ID: 60")
 	cleanInspector()
 	
 	if obj:IsA("BasePart") or obj:IsA("Model") then

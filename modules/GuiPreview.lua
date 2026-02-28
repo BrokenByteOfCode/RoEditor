@@ -1,5 +1,8 @@
+print("[RoEditor_DEBUG] Reached ID: 55")
 return function(UI)
+    print("[RoEditor_DEBUG] Reached ID: 56")
 	return function(obj, inspectorFrame, inspectorConnections, RunService)
+     print("[RoEditor_DEBUG] Reached ID: 57")
 		local vpSize = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
 		local scale = UI("UIScale", { Scale = 200 / math.max(1, vpSize.Y) })
 		local virtualScreen = UI("Frame", { Name = "VirtualScreen", Size = UDim2.new(0, vpSize.X, 0, vpSize.Y), BackgroundTransparency = 1, Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), scale })
@@ -10,6 +13,7 @@ return function(UI)
 		})
 
 		table.insert(inspectorConnections, container:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+      print("[RoEditor_DEBUG] Reached ID: 58")
 			if container.AbsoluteSize.X > 0 and vpSize.X > 0 then scale.Scale = math.min(container.AbsoluteSize.X / vpSize.X, 200 / vpSize.Y) end
 		end))
 

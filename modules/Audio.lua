@@ -1,10 +1,14 @@
+print("[RoEditor_DEBUG] Reached ID: 50")
 return function(UI)
+    print("[RoEditor_DEBUG] Reached ID: 51")
 	return function(obj, inspectorFrame, inspectorConnections, RunService)
+     print("[RoEditor_DEBUG] Reached ID: 52")
 		UI("Frame", { Size = UDim2.new(1, 0, 0, 25), BackgroundTransparency = 1, Parent = inspectorFrame,
 			UI("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, SortOrder = Enum.SortOrder.LayoutOrder }),
 			UI("TextButton", { Size = UDim2.new(0.33, 0, 1, 0), BackgroundColor3 = Color3.new(0.1, 0.4, 0.1), TextColor3 = Color3.new(1, 1, 1), Text = "Play", Font = Enum.Font.Code, TextSize = 12, LayoutOrder = 1, Events = { MouseButton1Click = function() pcall(function() obj:Play() end) end } }),
 			UI("TextButton", { Size = UDim2.new(0.34, 0, 1, 0), BackgroundColor3 = Color3.new(0.6, 0.6, 0.1), TextColor3 = Color3.new(1, 1, 1), Text = "Pause", Font = Enum.Font.Code, TextSize = 12, LayoutOrder = 2, Events = { MouseButton1Click = function() pcall(function() obj:Pause() end) end } }),
 			UI("TextButton", { Size = UDim2.new(0.33, 0, 1, 0), BackgroundColor3 = Color3.new(0.6, 0.1, 0.1), TextColor3 = Color3.new(1, 1, 1), Text = "Stop", Font = Enum.Font.Code, TextSize = 12, LayoutOrder = 3, Events = { MouseButton1Click = function() pcall(function() obj:Stop() end) end } })
+       print("[RoEditor_DEBUG] Reached ID: 53")
 		})
 
 		local timeLabel = UI("TextLabel", { Size = UDim2.new(1, 0, 0, 15), BackgroundTransparency = 1, TextColor3 = Color3.new(0.9, 0.9, 0.9), TextXAlignment = Enum.TextXAlignment.Center, Font = Enum.Font.Code, TextSize = 12, Text = "Time: 00:00.0 / 00:00.0" })
@@ -16,6 +20,7 @@ return function(UI)
 		})
 
 		table.insert(inspectorConnections, RunService.RenderStepped:Connect(function()
+      print("[RoEditor_DEBUG] Reached ID: 54")
 			if obj.Parent then
 				local pos, len = obj.TimePosition, obj.TimeLength
 				if obj.IsLoaded then
