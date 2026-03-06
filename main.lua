@@ -281,10 +281,16 @@ task.spawn(function()
 			rtitems = nil
 		}
 		
+		local moduleState = {}
+		for _, m in ipairs(optModules) do
+			moduleState[m.id] = { conns = {}, guis = {}, btnConn = nil }
+		end
+		
 		local globalConnections = {}
 		local inspectorConnections = {}
 		local nodeMap = setmetatable({}, {__mode = "k"})
 		local objToNode = setmetatable({}, {__mode = "k"})
+		local currentInspectedObj = nil
 
 		local function cleanInspector()
 			for _, conn in ipairs(inspectorConnections) do if conn.Connected then conn:Disconnect() end end
@@ -325,6 +331,7 @@ task.spawn(function()
 		end
 
 		local function inspectObj(obj)
+			currentInspectedObj = obj
 			ui.gui.Enabled = true
 			ui.searchBar.Text = "" 
 			expandTo(obj)
@@ -424,23 +431,38 @@ task.spawn(function()
 			end
 		end
 
-		if config.monitor then
-			modInst.monitor = refs.monitor(UI)
-			local toggleMonitor = modInst.monitor(ui.gui, globalConnections, RunService)
-			ui.monitorBtn.MouseButton1Click:Connect(toggleMonitor)
+		local function initToggleMod(id)
+			if not modInst[id] then return end
+			local state = moduleState[id]
+			local before = {}
+			for _, c in ipairs(ui.gui:GetChildren()) do before[c] = true end
+			
+			local toggleFn
+			if id == "monitor" then toggleFn = modInst.monitor(ui.gui, state.conns, RunService)
+			elseif id == "clinker" then toggleFn = modInst.clinker(ui.gui, state.conns, RunService, fsModule)
+			elseif id == "rtitems" then toggleFn = modInst.rtitems(ui.gui, state.conns, inspectObj) end
+			
+			if id == "monitor" then state.btnConn = ui.monitorBtn.MouseButton1Click:Connect(toggleFn)
+			elseif id == "clinker" then state.btnConn = ui.clinkerBtn.MouseButton1Click:Connect(toggleFn)
+			elseif id == "rtitems" then state.btnConn = ui.rtItemBtn.MouseButton1Click:Connect(toggleFn) end
+			
+			for _, c in ipairs(ui.gui:GetChildren()) do
+				if not before[c] then table.insert(state.guis, c) end
+			end
 		end
 
-		if config.clinker then
-			modInst.clinker = refs.clinker(UI)
-			local toggleClinker = modInst.clinker(ui.gui, globalConnections, RunService, fsModule)
-			ui.clinkerBtn.MouseButton1Click:Connect(toggleClinker)
+		local function unloadToggleModule(id)
+			local state = moduleState[id]
+			if state.btnConn then state.btnConn:Disconnect() state.btnConn = nil end
+			for _, c in ipairs(state.conns) do if c.Connected then c:Disconnect() end end
+			table.clear(state.conns)
+			for _, g in ipairs(state.guis) do g:Destroy() end
+			table.clear(state.guis)
 		end
 
-		if config.rtitems then
-			modInst.rtitems = refs.rtitems(UI)
-			local toggleRtItems = modInst.rtitems(ui.gui, globalConnections, inspectObj)
-			ui.rtItemBtn.MouseButton1Click:Connect(toggleRtItems)
-		end
+		if config.monitor then modInst.monitor = refs.monitor(UI) initToggleMod("monitor") end
+		if config.clinker then modInst.clinker = refs.clinker(UI) initToggleMod("clinker") end
+		if config.rtitems then modInst.rtitems = refs.rtitems(UI) initToggleMod("rtitems") end
 		
 		alignButtons()
 
@@ -530,36 +552,43 @@ task.spawn(function()
 				
 				pcall(function() writefile(configPath, HttpService:JSONEncode(config)) end)
 				
-				if config[m.id] and not isLoaded[m.id] then
-					btn.Text = "..."
-					task.spawn(function()
-						local path
-						for _, mod in ipairs(modulesToLoad) do
-							if mod.id == m.id then path = mod.path break end
+				if config[m.id] then
+					if not isLoaded[m.id] then
+						btn.Text = "..."
+						task.spawn(function()
+							local path
+							for _, mod in ipairs(modulesToLoad) do
+								if mod.id == m.id then path = mod.path break end
+							end
+							refs[m.id] = fetchModule(path)
+							isLoaded[m.id] = true
+							
+							modInst[m.id] = refs[m.id](UI)
+							if m.id == "monitor" or m.id == "clinker" or m.id == "rtitems" then
+								initToggleMod(m.id)
+							else
+								if currentInspectedObj then inspectObj(currentInspectedObj) end
+							end
+							
+							btn.Text = "ON"
+							alignButtons()
+						end)
+					else
+						modInst[m.id] = refs[m.id](UI)
+						if m.id == "monitor" or m.id == "clinker" or m.id == "rtitems" then
+							initToggleMod(m.id)
+						else
+							if currentInspectedObj then inspectObj(currentInspectedObj) end
 						end
-						refs[m.id] = fetchModule(path)
-						
-						if m.id == "audio" or m.id == "viewport" or m.id == "guiprev" or m.id == "script" then
-							modInst[m.id] = refs[m.id](UI)
-						elseif m.id == "clinker" then
-							modInst[m.id] = refs[m.id](UI)
-							local toggleFn = modInst[m.id](ui.gui, globalConnections, RunService, fsModule)
-							ui.clinkerBtn.MouseButton1Click:Connect(toggleFn)
-						elseif m.id == "monitor" then
-							modInst[m.id] = refs[m.id](UI)
-							local toggleFn = modInst[m.id](ui.gui, globalConnections, RunService)
-							ui.monitorBtn.MouseButton1Click:Connect(toggleFn)
-						elseif m.id == "rtitems" then
-							modInst[m.id] = refs[m.id](UI)
-							local toggleFn = modInst[m.id](ui.gui, globalConnections, inspectObj)
-							ui.rtItemBtn.MouseButton1Click:Connect(toggleFn)
-						end
-						
-						isLoaded[m.id] = true
-						btn.Text = "ON"
 						alignButtons()
-					end)
+					end
 				else
+					if m.id == "monitor" or m.id == "clinker" or m.id == "rtitems" then
+						unloadToggleModule(m.id)
+					else
+						modInst[m.id] = dummyFactory()
+						if currentInspectedObj then inspectObj(currentInspectedObj) end
+					end
 					alignButtons()
 				end
 			end)
